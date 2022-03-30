@@ -4,7 +4,7 @@ const buttonLoaderComments = document.querySelector('.comments-loader');
 const buttonCloseBigPhoto = photo.querySelector('#picture-cancel');
 const amountShownComments = document.getElementsByClassName('social__comment');
 const socialCommentsCount = document.querySelector('.social__comment-count');
-let recorderComments = [];
+let viewedComments = [];
 // значение n - недостающее количество узлов DOM(LI) для отображения 5 комментариев при открытии bigPhoto
 const getNewSocialComments = (n) => {
   for (let i = 1; i <= n; i++) {
@@ -50,6 +50,7 @@ export const setCloseBigPhoto = () => {
   }
 };
 export const renderBigPhoto = (item) => {
+
   const dataComments = item.comments.slice();
   const amountComments = item.comments.length;
   const renderComments = () => {
@@ -59,25 +60,27 @@ export const renderBigPhoto = (item) => {
     socialCommentsCount.innerHTML = `${amountShownComments.length} из <span class="comments-count">${amountComments}</span> комментариев`;
   };
   //   количество показываемых комментариев для цикла - l-1, m - переменная для коррекции записи данных в новые комментарии, с учётом уже записанных
-  const renderTextComments = (l, m) => {
+  const renderTextComments = function(l, m) {
+    const imgAvatars = document.querySelectorAll('.social__comment>img');
+    const textComments = document.querySelectorAll('.social__text');
     for (let i = 0; i <= l; i++) {
-      document.querySelectorAll('.social__comment>img')[i + m].setAttribute('src', item.comments[i].avatar);
-      document.querySelectorAll('.social__comment>img')[i + m].setAttribute('alt', item.comments[i].name);
-      document.querySelectorAll('.social__text')[i + m].textContent = item.comments[i].message;
+      imgAvatars[i + m].setAttribute('src', item.comments[i].avatar);
+      imgAvatars[i + m].setAttribute('alt', item.comments[i].name);
+      textComments[i + m].textContent = item.comments[i].message;
     }
   };
   renderComments();
   renderTextComments(4, 0);
-  const newComments = socialComments.innerHTML;
+  const templateComments = socialComments.innerHTML;
   const onButtonLoadCommentsClick = () => {
-    recorderComments = recorderComments.concat(item.comments.splice(0, 5));
+    viewedComments = viewedComments.concat(item.comments.splice(0, 5));
     if (item.comments.length < 5) {
       getNewSocialComments(item.comments.length);
-      renderTextComments(item.comments.length - 1, recorderComments.length);
+      renderTextComments(item.comments.length - 1, viewedComments.length);
       buttonLoaderComments.classList.add('hidden');
     } else {
       getNewSocialComments(5);
-      renderTextComments(4, recorderComments.length);
+      renderTextComments(4, viewedComments.length);
       buttonLoaderComments.classList.remove('hidden');
     }
     socialCommentsCount.innerHTML = `${amountShownComments.length} из <span class="comments-count">${amountComments}</span> комментариев`;
@@ -85,11 +88,11 @@ export const renderBigPhoto = (item) => {
   buttonLoaderComments.addEventListener('click', onButtonLoadCommentsClick);
   buttonCloseBigPhoto.addEventListener('click', () => {
     socialComments.innerHTML = '';
-    socialComments.insertAdjacentHTML('beforeend', newComments);
+    socialComments.insertAdjacentHTML('beforeend', templateComments);
     item.comments.length = 0;
     item.comments = dataComments.slice();
     buttonLoaderComments.classList.remove('hidden');
     buttonLoaderComments.removeEventListener('click', onButtonLoadCommentsClick);
-    recorderComments.length = 0;
+    viewedComments.length = 0;
   });
 };
